@@ -137,7 +137,7 @@ const timeline = [
   {
     title: "B.Tech, Computer Science",
     meta: "Narula Institute of Technology",
-    year: "2022 — 2026",
+    year: "2023 — 2037",
     icon: BookOpen,
   },
   {
