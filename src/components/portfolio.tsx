@@ -8,8 +8,10 @@ import {
   Globe2,
   Mail,
   MapPin,
+  Moon,
   Phone,
   Send,
+  Sun,
   Download,
   Microscope,
   Trophy,
@@ -137,7 +139,7 @@ const timeline = [
   {
     title: "B.Tech, Computer Science",
     meta: "Narula Institute of Technology",
-    year: "2023 — 2037",
+    year: "2023 — 2027",
     icon: BookOpen,
   },
   {
@@ -413,6 +415,29 @@ function MagneticButton({
 /*  SECTION HEADER                                                          */
 /* ----------------------------------------------------------------------- */
 
+function ThemeToggle({ isDarkMode, onToggle }: { isDarkMode: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log("theme toggle clicked", isDarkMode);
+        onToggle();
+      }}
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition ${
+        isDarkMode
+          ? "border-white/10 bg-white/[0.05] text-slate-200 hover:bg-white/[0.08]"
+          : "border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-100"
+      }`}
+      aria-label={`Switch to ${isDarkMode ? "light" : "dark"} mode`}
+    >
+      {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
+      {isDarkMode ? "Light" : "Dark"}
+    </button>
+  );
+}
+
 function SectionHeader({
   eyebrow,
   title,
@@ -454,7 +479,7 @@ function GlassPanel({
 }) {
   return (
     <div
-      className={`relative rounded-[1.75rem] border border-white/[0.08] bg-white/[0.025] backdrop-blur-2xl ${
+      className={`glass-panel relative rounded-[1.75rem] border border-white/[0.08] bg-white/[0.025] backdrop-blur-2xl ${
         glow ? "shadow-[0_0_60px_-15px_rgba(124,58,237,0.35)]" : ""
       } ${className}`}
     >
@@ -472,6 +497,7 @@ export function Portfolio() {
   const [filter, setFilter] = useState("All");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const heroRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0.2]);
@@ -483,6 +509,37 @@ export function Portfolio() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem("portfolio-theme");
+    if (storedTheme === "light") {
+      setIsDarkMode(false);
+    } else if (storedTheme === "dark") {
+      setIsDarkMode(true);
+    } else {
+      setIsDarkMode(window.matchMedia("(prefers-color-scheme: dark)").matches);
+    }
+  }, []);
+
+  const applyTheme = (nextMode: boolean) => {
+    document.documentElement.setAttribute("data-theme", nextMode ? "dark" : "light");
+    document.documentElement.style.colorScheme = nextMode ? "dark" : "light";
+    document.body.style.backgroundColor = nextMode ? "#05050a" : "#f8fafc";
+    document.body.style.color = nextMode ? "#e2e8f0" : "#111827";
+    window.localStorage.setItem("portfolio-theme", nextMode ? "dark" : "light");
+  };
+
+  useEffect(() => {
+    applyTheme(isDarkMode);
+  }, [isDarkMode]);
+
+  const toggleTheme = () => {
+    setIsDarkMode((value) => {
+      const nextMode = !value;
+      applyTheme(nextMode);
+      return nextMode;
+    });
+  };
+
   const categories = useMemo(
     () => ["All", ...Array.from(new Set(projects.map((p) => p.category)))],
     []
@@ -493,7 +550,11 @@ export function Portfolio() {
   const statsInView = useInView<HTMLDivElement>();
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#05050a] font-sans text-slate-200 antialiased">
+    <div
+      className={`relative min-h-screen overflow-x-hidden font-sans antialiased transition-colors duration-500 ${
+        isDarkMode ? "bg-[#05050a] text-slate-200" : "bg-[#f8fafc] text-slate-800"
+      }`}
+    >
       <style>{`
         @keyframes grid-pan { from { background-position: 0 0; } to { background-position: 64px 64px; } }
         @keyframes float-slow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-14px); } }
@@ -566,6 +627,7 @@ export function Portfolio() {
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
+            <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
             <MagneticButton
               href="#contact"
               className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 text-sm font-medium text-black shadow-[0_0_20px_-4px_rgba(124,58,237,0.7)] transition hover:shadow-[0_0_28px_-2px_rgba(124,58,237,0.9)]"
@@ -602,6 +664,9 @@ export function Portfolio() {
                     {item.label}
                   </a>
                 ))}
+                <div className="mt-2 px-3 pt-2">
+                  <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
+                </div>
               </div>
             </motion.div>
           )}
@@ -929,7 +994,7 @@ export function Portfolio() {
                     rel="noreferrer"
                     className="flex items-center gap-1 text-xs font-medium text-slate-400 transition group-hover:text-white"
                   >
-                    Visit <ArrowUpRight size={13} />
+                    Visit 🌐 <ArrowUpRight size={13} />
                   </a>
                 </div>
                 <div className="relative mt-5 overflow-hidden rounded-[1.25rem] border border-white/[0.06] bg-black/20">
@@ -991,7 +1056,7 @@ export function Portfolio() {
                   rel="noreferrer"
                   className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-white transition hover:gap-3"
                 >
-                  Read paper <ArrowRight size={14} />
+                  Read paper 📄 <ArrowRight size={14} />
                 </a>
               </GlassPanel>
             </motion.article>
@@ -1067,7 +1132,7 @@ export function Portfolio() {
                 rel="noreferrer"
                 className="flex items-center gap-1 text-sm text-slate-400 transition hover:text-white"
               >
-                View profile <ArrowUpRight size={14} />
+                View profile 🐙 <ArrowUpRight size={14} />
               </a>
             </div>
             <div className="mt-6 overflow-hidden rounded-xl border border-white/[0.06] bg-black/40 p-2">
@@ -1107,7 +1172,7 @@ export function Portfolio() {
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.04] text-violet-300">
                     <Mail size={16} />
                   </span>
-                  kausiknaskar10@gmail.com
+                  ✉️ kausiknaskar10@gmail.com
                 </a>
                 <a
                   href="tel:+919331519440"
@@ -1116,7 +1181,7 @@ export function Portfolio() {
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.04] text-cyan-300">
                     <Phone size={16} />
                   </span>
-                  +91 93315 19440
+                  📞 +91 93315 19440
                 </a>
                 <div className="flex items-center gap-3 text-sm text-slate-300">
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.04] text-violet-300">
